@@ -1102,6 +1102,12 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
     if(spellInfo_1->Id == spellId_2)
         return false;
 
+    //[pentax 2009-02-11 13:48:47 /lenst]
+    //Primal Instinct should not replace any other auras I think
+    if (spellId_1 == 43738)
+        return false;
+    //End [pentax 2009-02-11 13:49:38 /lenst]
+
     //I think we don't check this correctly because i need a exception for spell:
     //72,11327,18461...(called from 1856,1857...) Call Aura 16,31, after trigger another spell who call aura 77 and 77 remove 16 and 31, this should not happen.
     if(spellInfo_2->SpellFamilyFlags == 2048)
