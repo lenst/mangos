@@ -4862,23 +4862,15 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                     unitTarget->CastSpell(unitTarget,51771,false);
                     break;
                 }
-                // Blood Draw   [pentax 2009-02-13 22:01:39 /lenst]
-                case 50252:
+                case 47703: // Unholy Union  [pentax 2009-02-13 22:06:17 /lenst]
+                case 50252: // Blood Draw   [pentax 2009-02-13 22:01:39 /lenst]
+                    // merged cases [pentax 2009-02-18 10:06:34 /lenst]
                 {
                     if(!unitTarget)
                         return;
-                    sLog.outDebug ("Blood Draw (dmg=%d)", damage);
-                    unitTarget->CastSpell(unitTarget,50250,false);
-                    break;
-                }
-                // Unholy Union  [pentax 2009-02-13 22:06:17 /lenst]
-                case 47703:
-                {
-                    if(!unitTarget)
-                        return;
-                    sLog.outDebug ("Unholy Union (dmg=%d)", damage);
-                    // damage==50254
-                    unitTarget->CastSpell(unitTarget,50254,false);
+                    //Blood Draw (damage=50250)
+                    // Unholy Union damage==50254
+                    unitTarget->CastSpell(unitTarget,damage,false);
                     break;
                 }
                 // Death Gate
