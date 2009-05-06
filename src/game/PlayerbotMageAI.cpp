@@ -68,36 +68,42 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget){
 		case SPELL_FROST:
 			if (CHILLED > 0 && LastSpellFrost < 1) {
 				ai->CastSpell(CHILLED, *pTarget);
+                SAY("casting chilled");
 				SpellSequence = SPELL_FROST;
 				(LastSpellFrost = LastSpellFrost +1);
 				break;
 			}
 			else if (FROSTBITE > 0 && LastSpellFrost < 2) {
 				ai->CastSpell(FROSTBITE, *pTarget);
+                SAY("casting frostbite");
 				SpellSequence = SPELL_FROST;
 				(LastSpellFrost = LastSpellFrost +1);
 				break;
 			}
 			else if (DEEP_FREEZE > 0 && LastSpellFrost < 3 && ai->GetManaPercent() >= 9) {
 				ai->CastSpell(DEEP_FREEZE, *pTarget);
+                SAY("casting deep freeze");
 				SpellSequence = SPELL_FROST;
 				(LastSpellFrost = LastSpellFrost +1);
 				break;
 			}
 			else if (ICE_LANCE > 0 && LastSpellFrost < 4 && ai->GetManaPercent() >= 7) {
 				ai->CastSpell(ICE_LANCE, *pTarget);
+                SAY("casting ice lance");
 				SpellSequence = SPELL_FIRE;
 				(LastSpellFrost = LastSpellFrost +1);
 				break;
 			}
 			else if (FROSTBOLT > 0 && LastSpellFrost < 5 && ai->GetManaPercent() >= 13) {
 				ai->CastSpell(FROSTBOLT, *pTarget);
+                SAY("casting frostbolt");
 				SpellSequence = SPELL_FIRE;
 				(LastSpellFrost = LastSpellFrost +1);
 				break;
 			}
 			else if (FROST_NOVA > 0 && LastSpellFrost < 6 && ai->GetManaPercent() >= 8) {
 				ai->CastSpell(FROST_NOVA, *pTarget);
+                SAY("casting frost nova");
 				SpellSequence = SPELL_FIRE;
 				(LastSpellFrost = LastSpellFrost +1);
 				break;
@@ -111,24 +117,28 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget){
 			*/
 			else if (ICY_VEINS > 0 && LastSpellFrost < 8 && ai->GetManaPercent() >= 3) {
 				ai->CastSpell(ICY_VEINS);
+                SAY("casting icy veins");
 				SpellSequence = SPELL_FIRE;
 				(LastSpellFrost = LastSpellFrost +1);
 				break;
 			}
 			else if (CONE_OF_COLD > 0 && LastSpellFrost < 9 && ai->GetManaPercent() >= 35) {
 				ai->CastSpell(CONE_OF_COLD, *pTarget);
+                SAY("casting cone of cold");
 				SpellSequence = SPELL_FIRE;
 				(LastSpellFrost = LastSpellFrost +1);
 				break;
 			}
 			else if (ICE_BARRIER > 0 && LastSpellFrost < 7 && ai->GetManaPercent() >= 30) {
 				ai->CastSpell(ICE_BARRIER);
+                SAY("casting ice barrier ");
 				SpellSequence = SPELL_FIRE;
 				(LastSpellFrost = LastSpellFrost +1);
 				break;
 			}
 			else if (SUMMON_WATER_ELEMENTAL > 0 && LastSpellFrost < 11 && ai->GetManaPercent() >= 16) {
 				ai->CastSpell(SUMMON_WATER_ELEMENTAL);
+                SAY("casting summon water elemental");
 				SpellSequence = SPELL_FIRE;
 				(LastSpellFrost = LastSpellFrost +1);
 				break;
@@ -142,36 +152,42 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget){
 		case SPELL_FIRE:
 			if (FIREBALL > 0 && LastSpellFire < 1 && ai->GetManaPercent() >= 23) {
 				ai->CastSpell(FIREBALL, *pTarget);
+                SAY("casting fireball");
 				SpellSequence = SPELL_ARCANE;
 				(LastSpellFire = LastSpellFire +1);
 				break;
 			}
 			else if (FIREBLAST > 0 && LastSpellFire < 2 && ai->GetManaPercent() >= 25) {
 				ai->CastSpell(FIREBLAST, *pTarget);
+                SAY("casting fireblast");
 				SpellSequence = SPELL_ARCANE;
 				(LastSpellFire = LastSpellFire +1);
 				break;
 			}
 			else if (IMPACT > 0 && LastSpellFire < 3) {
 				ai->CastSpell(IMPACT, *pTarget);
+                SAY("casting impact");
 				SpellSequence = SPELL_ARCANE;
 				(LastSpellFire = LastSpellFire +1);
 				break;
 			}
 			else if (FLAMESTRIKE > 0 && LastSpellFire < 4 && ai->GetManaPercent() >= 35) {
 				ai->CastSpell(FLAMESTRIKE, *pTarget);
+                SAY("casting flamestrike");
 				SpellSequence = SPELL_ARCANE;
 				(LastSpellFire = LastSpellFire +1);
 				break;
 			}
 			else if (SCORCH > 0 && LastSpellFire < 5 && ai->GetManaPercent() >= 10) {
 				ai->CastSpell(SCORCH, *pTarget);
+                SAY("casting scorch");
 				SpellSequence = SPELL_ARCANE;
 				(LastSpellFire = LastSpellFire +1);
 				break;
 			}
 			else if (PYROBLAST > 0 && LastSpellFire < 6 && ai->GetManaPercent() >= 27) {
 				ai->CastSpell(PYROBLAST, *pTarget);
+                SAY("casting pyroblast");
 				SpellSequence = SPELL_ARCANE;
 				(LastSpellFire = LastSpellFire +1);
 				break;
@@ -202,6 +218,7 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget){
 			}
 			else if (FROSTFIRE_BOLT > 0 && LastSpellFire < 11 && ai->GetManaPercent() >= 14) {
 				ai->CastSpell(FROSTFIRE_BOLT, *pTarget);
+                SAY("casting frostfire bolt");
 				SpellSequence = SPELL_ARCANE;
 				(LastSpellFire = LastSpellFire +1);
 				break;
@@ -217,6 +234,7 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget){
 		case SPELL_ARCANE:
 			if (ARCANE_MISSILES > 0 && LastSpellArcane < 2 && ai->GetManaPercent() >= 37) {
 				ai->CastSpell(ARCANE_MISSILES, *pTarget);
+                SAY("casting ARCANE_missiles");
 				SpellSequence = SPELL_ARCANE;
 				(LastSpellArcane = LastSpellArcane +1);
 				break;
@@ -229,24 +247,28 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget){
 			}
 			else if (COUNTERSPELL > 0 && LastSpellArcane < 5 && ai->GetManaPercent() >= 9) {
 				ai->CastSpell(COUNTERSPELL, *pTarget);
+                SAY("casting counterspell");
 				SpellSequence = SPELL_FROST;
 				(LastSpellArcane = LastSpellArcane +1);
 				break;
 			}
 			else if (SLOW > 0 && LastSpellArcane < 6 && ai->GetManaPercent() >= 12) {
 				ai->CastSpell(SLOW, *pTarget);
+                SAY("casting slow");
 				SpellSequence = SPELL_FROST;
 				(LastSpellArcane = LastSpellArcane +1);
 				break;
 			}
 			else if (ARCANE_BARRAGE > 0 && LastSpellArcane < 7 && ai->GetManaPercent() >= 27) {
 				ai->CastSpell(ARCANE_BARRAGE, *pTarget);
+                SAY("casting ARCANE_barrage");
 				SpellSequence = SPELL_FROST;
 				(LastSpellArcane = LastSpellArcane +1);
 				break;
 			}
 			else if (ARCANE_BLAST > 0 && LastSpellArcane < 8 && ai->GetManaPercent() >= 8) {
 				ai->CastSpell(ARCANE_BLAST, *pTarget);
+                SAY("casting ARCANE_blast");
 				SpellSequence = SPELL_FROST;
 				(LastSpellArcane = LastSpellArcane +1);
 				break;
@@ -267,102 +289,53 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget){
 
 } // end DoNextCombatManeuver
 
-void PlayerbotMageAI::DoNonCombatActions(){
-	Player * m_bot = GetPlayerBot();
-	if (!m_bot) {
-		return;
-	}
+void PlayerbotMageAI::DoNonCombatActions() {
+	Player* bot = GetPlayerBot();
+	PlayerbotAI* ai = GetAI();
 
 	SpellSequence = SPELL_FROST;
 
 	// buff myself
 
 	if (DALARAN_INTELLECT > 0) { 
-		(!m_bot->HasAura(DALARAN_INTELLECT, 0) && GetAI()->CastSpell (DALARAN_INTELLECT, *m_bot));
+		(!bot->HasAura(DALARAN_INTELLECT, 0) && ai->CastSpell (DALARAN_INTELLECT, *bot));
 	}
 	else if (ARCANE_INTELLECT > 0) { 
-		(!m_bot->HasAura(ARCANE_INTELLECT, 0) && GetAI()->CastSpell (ARCANE_INTELLECT, *m_bot));
+		(!bot->HasAura(ARCANE_INTELLECT, 0) && ai->CastSpell (ARCANE_INTELLECT, *bot));
 	}
   
 	if (ICE_ARMOR > 0) { 
-		(!m_bot->HasAura(ICE_ARMOR, 0) && GetAI()->CastSpell (ICE_ARMOR, *m_bot));
+		(!bot->HasAura(ICE_ARMOR, 0) && ai->CastSpell (ICE_ARMOR, *bot));
 	}
 	else if (FROST_ARMOR > 0) {
-		(!m_bot->HasAura(FROST_ARMOR, 0) && GetAI()->CastSpell (FROST_ARMOR, *m_bot));
+		(!bot->HasAura(FROST_ARMOR, 0) && ai->CastSpell (FROST_ARMOR, *bot));
 	}
 
 	// buff master
 
 	if (DALARAN_INTELLECT > 0) { 
-		(!GetMaster()->HasAura(DALARAN_INTELLECT, 0) && GetAI()->CastSpell (DALARAN_INTELLECT, *(GetMaster())) );
+		(!GetMaster()->HasAura(DALARAN_INTELLECT, 0) && ai->CastSpell (DALARAN_INTELLECT, *(GetMaster())) );
 	}	
 	else if (ARCANE_INTELLECT > 0) { 
-		(!GetMaster()->HasAura(ARCANE_INTELLECT, 0) && GetAI()->CastSpell (ARCANE_INTELLECT, *(GetMaster())) );
+		(!GetMaster()->HasAura(ARCANE_INTELLECT, 0) && ai->CastSpell (ARCANE_INTELLECT, *(GetMaster())) );
 	}
 
 	// conjure food & water
 
-	if (m_bot->getStandState() != PLAYER_STATE_NONE)
-		m_bot->SetStandState(PLAYER_STATE_NONE);
-
-	Item* pItem = GetAI()->FindDrink();
-
-	if (pItem == NULL && GetAI()->GetBaseManaPercent() >= 48) {
-		GetAI()->TellMaster("I'm conjuring some water.");
-		GetAI()->CastSpell(CONJURE_WATER, *m_bot);
+	if (ai->FindDrink() == NULL && ai->GetBaseManaPercent() >= 48) {
+		ai->TellMaster("I'm conjuring some water.");
+		ai->CastSpell(CONJURE_WATER, *bot);
 		return;
 	}
-
-	else if (pItem != NULL && GetAI()->GetManaPercent() < 15) {
-		GetAI()->TellMaster("I could use a drink.");
-		GetAI()->UseItem(*pItem);
-		GetAI()->SetIgnoreUpdateTime(30);
+	if (ai->FindFood() == NULL && ai->GetBaseManaPercent() >= 48) {
+		ai->TellMaster("I'm conjuring some food.");
+		ai->CastSpell(CONJURE_FOOD, *bot);
+        return;
+	}
+    if (ai->GetManaPercent() < 15 || ai->GetHealthPercent() < 15) {
+		ai->Feast();
 		return;
 	}
-
-	pItem = GetAI()->FindFood();
-
-	if (pItem == NULL && GetAI()->GetBaseManaPercent() >= 48) {
-		GetAI()->TellMaster("I'm conjuring some food.");
-		GetAI()->CastSpell(CONJURE_FOOD, *m_bot);
-	}
-
-	// hp check
-	if (m_bot->getStandState() != PLAYER_STATE_NONE)
-		m_bot->SetStandState(PLAYER_STATE_NONE);
-
-	pItem = GetAI()->FindFood();
-
-	if (pItem != NULL && GetAI()->GetHealthPercent() < 15) {
-		GetAI()->TellMaster("I could use some food.");
-		GetAI()->UseItem(*pItem);
-		GetAI()->SetIgnoreUpdateTime(30);
-		return;
-	}
-
-/*
-	// buff and heal master's group
-	if (GetMaster()->GetGroup()) {
-	Group::MemberSlotList const& groupSlot = GetMaster()->GetGroup()->GetMemberSlots();
-	for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++) {
-		Player *tPlayer = GetMaster()->GetObjPlayer(itr->guid);
-
-		// first rezz em
-		if (tPlayer->isDead()) {
-			std::string msg = "rezzing ";
-			msg += tPlayer->GetName();
-			GetPlayerBot()->Say(msg, LANG_UNIVERSAL);
-			GetAI()->CastSpell(REZZ, *tPlayer);
-			// rez is only 10 sec, but give time for lag
-			GetAI()->SetIgnoreUpdateTime(15); 
-		} else {
-			// buff and heal
-			(!tPlayer->HasAura(FORTITUDE,0) && GetAI()->CastSpell (FORTITUDE, *tPlayer));
-			(HealTarget(*tPlayer, tPlayer->GetHealth()*100 / tPlayer->GetMaxHealth())); 
-		}
-	}
-	}
-*/
 
 } // end DoNonCombatActions
 

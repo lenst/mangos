@@ -49,6 +49,7 @@ PlayerbotAI::PlayerbotAI(Player* const master, Player* const bot):
     m_combatOrder(ORDERS_NONE), m_ScenarioType(SCENARIO_PVEEASY),
     m_TimeDoneEating(0), m_TimeDoneDrinking(0), m_CurrentlyCastingSpellId(0),
     m_IsFollowingMaster(true), m_spellIdCommand(0), m_targetGuidCommand(0),
+    m_role(ROLE_MIXED), m_quiet(false),
     m_classAI(0)
 {
 
@@ -892,30 +893,32 @@ void PlayerbotAI::Feast() {
 
     // wait 3 seconds before checking if we need to drink more or eat more
     time_t currentTime = time(0);
-    m_ignoreAIUpdatesUntilTime = currentTime + 3;
+    //m_ignoreAIUpdatesUntilTime = currentTime + 3;
 
     // should we drink another
     if (m_bot->getPowerType() == POWER_MANA && currentTime > m_TimeDoneDrinking
         && ((static_cast<float>(m_bot->GetPower(POWER_MANA)) / m_bot->GetMaxPower(POWER_MANA)) < 0.8)) {
         Item* pItem = FindDrink();
+        m_TimeDoneDrinking = currentTime + 30;
         if (pItem != NULL) {
+            TellMaster("drinking now...");
             UseItem(*pItem);
-            m_TimeDoneDrinking = currentTime + 30;
             return;
         }
-        TellMaster("I need water.");
+        else
+            TellMaster("I need water.");
     }
 
     // should we eat another
     if (currentTime > m_TimeDoneEating && ((static_cast<float>(m_bot->GetHealth()) / m_bot->GetMaxHealth()) < 0.8)) {
         Item* pItem = FindFood();
         if (pItem != NULL) {
-            //TellMaster("eating now...");
+            TellMaster("eating now...");
             UseItem(*pItem);
-            m_TimeDoneEating = currentTime + 30;
-            return;
         }
-        TellMaster("I need food.");
+        else
+            TellMaster("I need food.");
+        m_TimeDoneEating = currentTime + 30;
     }
 
     // if we are no longer eating or drinking
@@ -987,47 +990,15 @@ void PlayerbotAI::DoNextCombatManeuver() {
         return;
     }
 
+    if (GetClassAI()) {
+        (GetClassAI())->DoNextCombatManeuver(pTarget);
+        return;
+    }
+
     switch(m_bot->getClass()) {
-
-    case CLASS_PRIEST:
-        if (GetClassAI()) {
-            (GetClassAI())->DoNextCombatManeuver(pTarget);
-        }
-        break;
-
-    case CLASS_MAGE:
-        if (GetClassAI()) {
-            (GetClassAI())->DoNextCombatManeuver(pTarget);
-        }
-        break;
-
-    case CLASS_WARLOCK:
-        if (GetClassAI()) {
-            (GetClassAI())->DoNextCombatManeuver(pTarget);
-        }
-        break;
-
-    case CLASS_WARRIOR:
-        if (GetClassAI()) {
-            (GetClassAI())->DoNextCombatManeuver(pTarget);
-        }
-        break;
-
-    case CLASS_SHAMAN:
-        if (GetClassAI()) {
-            (GetClassAI())->DoNextCombatManeuver(pTarget);
-        }
-        break;
-    case CLASS_ROGUE:
-        if (GetClassAI()) {
-            (GetClassAI())->DoNextCombatManeuver(pTarget);
-        }
-        break;
-
     case CLASS_DRUID:
         CastSpell("moonfire") || CastSpell("roots") ||  CastSpell("wrath");
         break;
-
     }
 }
 
@@ -1071,11 +1042,11 @@ void PlayerbotAI::UpdateAI(const uint32 p_time) {
 //	else if (m_master->isInCombat() && ! m_bot->isInCombat())
     else if (m_master->isInCombat())
         GetCombatOrders();
-/*
-// are we sitting, if so feast if possible
-else if (m_bot->getStandState() == PLAYER_STATE_SIT)
-Feast();
-*/
+
+    // are we sitting, if so feast if possible
+    else if (m_bot->getStandState() == PLAYER_STATE_SIT)
+        Feast();
+
     // if commanded to follow master and not already following master then follow master
     else if (!m_bot->isInCombat() && m_IsFollowingMaster &&
              m_bot->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE)
@@ -1426,6 +1397,18 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer) {
                 TradeItem(**it);
         }
     }
+
+    else if (text == "quiet")
+        m_quiet = true;
+    else if (text == "speak")
+        m_quiet = false;
+    
+    else if (text == "mixed")
+        m_role = ROLE_MIXED;
+    else if (text == "dps")
+        m_role = ROLE_DPS;
+    else if (text == "healer")
+        m_role = ROLE_HEALER;
 
     else if (text == "follow" || text == "come")
         Follow(*m_master);

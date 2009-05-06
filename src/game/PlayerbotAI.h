@@ -18,6 +18,14 @@ enum ScenarioType {
   SCENARIO_PVPHARD
 };
 
+enum RoleType {
+  ROLE_MIXED,
+  ROLE_DPS,
+  ROLE_HEALER
+};
+
+
+
 class MANGOS_DLL_SPEC PlayerbotAI {
  public:
   // ******* Stuff the outside world calls ****************************
@@ -112,6 +120,8 @@ class MANGOS_DLL_SPEC PlayerbotAI {
   void SetIgnoreUpdateTime(uint8 t) {m_ignoreAIUpdatesUntilTime=time(0) + t; };
 
   Player *GetPlayerBot() {return m_bot;}
+  bool GetQuiet() {return m_quiet;}
+  RoleType GetRole() {return m_role;}
 
  private:
 
@@ -152,11 +162,14 @@ class MANGOS_DLL_SPEC PlayerbotAI {
   uint32 m_CurrentlyCastingSpellId;
   bool m_IsFollowingMaster;
 
+  //[pentax 2009-05-05 18:12:14 /lenst]
+  bool m_quiet;                 // Chatty or Quiet
+  RoleType m_role;
+
   // if master commands bot to do something, store here until updateAI
   // can do it
   uint32 m_spellIdCommand;
   uint64 m_targetGuidCommand;
 };
-
 
 #endif

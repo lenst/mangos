@@ -40,4 +40,6 @@ class MANGOS_DLL_SPEC PlayerbotClassAI  {
   PlayerbotAI* m_ai;
 };
 
+#define SAY(m) if (!GetAI()->GetQuiet()) {GetAI()->TellMaster((m));}
+
 #endif
