@@ -397,11 +397,7 @@ void PlayerbotShamanAI::DoNextCombatManeuver(Unit *pTarget){
 } // end DoNextCombatManeuver
 
 void PlayerbotShamanAI::DoNonCombatActions(){
-	Player * m_bot = GetPlayerBot();
-	if (!m_bot) {
-		return;
-	}
-
+    Player* m_bot = GetPlayerBot();
 	SpellSequence = SPELL_ENHANCEMENT;
 
 	// buff myself
@@ -422,32 +418,7 @@ void PlayerbotShamanAI::DoNonCombatActions(){
 		(!m_bot->HasAura(ROCKBITER_WEAPON, 0) && GetAI()->CastSpell (ROCKBITER_WEAPON, *m_bot));
 	}
 
-	// mana check
-	if (m_bot->getStandState() != PLAYER_STATE_NONE)
-		m_bot->SetStandState(PLAYER_STATE_NONE);
-
-	Item* pItem = GetAI()->FindDrink();
-
-	if (pItem != NULL && GetAI()->GetManaPercent() < 15) {
-		GetAI()->TellMaster("I could use a drink.");
-		GetAI()->UseItem(*pItem);
-		GetAI()->SetIgnoreUpdateTime(30);
-		return;
-	}
-
-	// hp check
-	if (m_bot->getStandState() != PLAYER_STATE_NONE)
-		m_bot->SetStandState(PLAYER_STATE_NONE);
-
-	pItem = GetAI()->FindFood();
-
-	if (pItem != NULL && GetAI()->GetHealthPercent() < 15) {
-		GetAI()->TellMaster("I could use some food.");
-		GetAI()->UseItem(*pItem);
-		GetAI()->SetIgnoreUpdateTime(30);
-		return;
-	}
-
+    PlayerbotClassAI::DoNonCombatActions();
 } // end DoNonCombatActions
 
 void PlayerbotShamanAI::BuffPlayer(Player* target) {

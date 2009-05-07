@@ -87,10 +87,8 @@ void PlayerbotPriestAI::HealTarget(Unit &target, uint8 hp){
 
     }
     else if (hp < 80 && RENEW > 0 && ai->GetManaPercent() >= 19) {
-        if (!ai->HasAura(RENEW, target)) {
+        if (ai->CastSpell(RENEW, target))
             SAY("I'm casting renew.");
-            ai->CastSpell(RENEW, target);
-        }
     }
 
 } // end HealTarget
@@ -352,11 +350,7 @@ void PlayerbotPriestAI::DoNonCombatActions() {
         (!GetMaster()->HasAura(FORTITUDE,0) && GetAI()->CastSpell (FORTITUDE, *(GetMaster())) );
     }
 
-    // mana check
-    if (m_bot->getStandState() != PLAYER_STATE_NONE)
-        if (GetAI()->GetManaPercent() < 15 || GetAI()->GetHealthPercent() < 15)
-            GetAI()->Feast();
-
+    PlayerbotClassAI::DoNonCombatActions();
 } // end DoNonCombatActions
 
 void PlayerbotPriestAI::BuffPlayer(Player* target) {

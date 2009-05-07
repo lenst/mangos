@@ -276,39 +276,8 @@ void PlayerbotRogueAI::DoNextCombatManeuver(Unit *pTarget){
 } // end DoNextCombatManeuver
 
 void PlayerbotRogueAI::DoNonCombatActions(){
-	Player * m_bot = GetPlayerBot();
-	if (!m_bot) {
-		return;
-	}
-
 	SpellSequence = SPELL_COMBAT;
-
-	// hp check
-	if (m_bot->getStandState() != PLAYER_STATE_NONE)
-		m_bot->SetStandState(PLAYER_STATE_NONE);
-
-	Item* pItem = GetAI()->FindFood();
-
-	if (pItem != NULL && GetAI()->GetHealthPercent() < 15) {
-		GetAI()->TellMaster("I could use some food.");
-		GetAI()->UseItem(*pItem);
-		GetAI()->SetIgnoreUpdateTime(30);
-		return;
-	}
-
-
-  /*
-	if (BATTLE_SHOUT > 0 && !m_bot->HasAura(BATTLE_SHOUT, 0)) {
-		if (BLOODRAGE > 0) {
-			GetAI()->CastSpell (BLOODRAGE, *m_bot);
-		}
-	}
-
-	if (BATTLE_SHOUT > 0 && !m_bot->HasAura(BATTLE_SHOUT, 0)) {
-		GetAI()->CastSpell (BATTLE_SHOUT, *m_bot);
-	}
-
-*/
+    PlayerbotClassAI::DoNonCombatActions();
 } // end DoNonCombatActions
 
 void PlayerbotRogueAI::BuffPlayer(Player* target) {

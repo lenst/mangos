@@ -351,16 +351,12 @@ void PlayerbotWarriorAI::DoNextCombatManeuver(Unit *pTarget){
 
 } // end DoNextCombatManeuver
 
-void PlayerbotWarriorAI::DoNonCombatActions(){
-	Player * m_bot = GetPlayerBot();
-	if (!m_bot) {
-		return;
-	}
 
+void PlayerbotWarriorAI::DoNonCombatActions(){
+    Player* m_bot = GetPlayerBot();
 	SpellSequence = SPELL_PROTECTION;
 
-
-  if (BATTLE_SHOUT > 0 && !m_bot->HasAura(BATTLE_SHOUT, 0)) {
+    if (BATTLE_SHOUT > 0 && !m_bot->HasAura(BATTLE_SHOUT, 0)) {
 		if (BLOODRAGE > 0) {
 			GetAI()->CastSpell (BLOODRAGE, *m_bot);
 		}
@@ -370,22 +366,9 @@ void PlayerbotWarriorAI::DoNonCombatActions(){
 		GetAI()->CastSpell (BATTLE_SHOUT, *m_bot);
 	}
 
-	// hp check
-	if (m_bot->getStandState() != PLAYER_STATE_NONE)
-		m_bot->SetStandState(PLAYER_STATE_NONE);
-
-	Item* pItem = GetAI()->FindFood();
-
-	if (pItem != NULL && GetAI()->GetHealthPercent() < 15) {
-		GetAI()->TellMaster("I could use some food.");
-		GetAI()->UseItem(*pItem);
-		GetAI()->SetIgnoreUpdateTime(30);
-		return;
-	}
-
-
+    PlayerbotClassAI::DoNonCombatActions();
 } // end DoNonCombatActions
 
-void PlayerbotWarriorAI::BuffPlayer(Player* target) {
 
+void PlayerbotWarriorAI::BuffPlayer(Player* target) {
 }

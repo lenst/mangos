@@ -135,10 +135,7 @@ void PlayerbotWarlockAI::DoNonCombatActions(){
         (!bot->HasAura(DEMON_SKIN, 0) && GetAI()->CastSpell (DEMON_SKIN, *bot));
     }
 
-    // mana check
-    if (GetAI()->GetManaPercent() < 25 || GetAI()->GetHealthPercent() < 25)
-        GetAI()->Feast();
-
+    PlayerbotClassAI::DoNonCombatActions();
 } // end DoNonCombatActions
 
 //void PlayerbotWarlockAI::BuffPlayer(Player* target) {

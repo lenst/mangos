@@ -9,6 +9,12 @@ enum {
 	SPELL_ARCANE
 };
 
+
+enum MageStrategyType {
+  MAGESTRATEGY_MIXED,
+  MAGESTRATEGY_FROST
+};
+
 //class Player;
 
 class MANGOS_DLL_SPEC PlayerbotMageAI : PlayerbotClassAI {
@@ -25,7 +31,14 @@ class MANGOS_DLL_SPEC PlayerbotMageAI : PlayerbotClassAI {
 		// buff a specific player, usually a real PC who is not in group
 		void BuffPlayer(Player *target);
 
+        // from a whisper or from the party channel, return true if handled
+        virtual bool HandleCommand(const std::string& text, Player& fromPlayer);
+
 	private:
+        void DoNextFrost(Unit*);
+
+        MageStrategyType m_strat;
+
 		// arcane
 		uint32 ARCANE_MISSILES, ARCANE_EXPLOSION, COUNTERSPELL, SLOW, ARCANE_BARRAGE, ARCANE_BLAST, MIRROR_IMAGE;
 

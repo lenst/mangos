@@ -46,11 +46,38 @@ PlayerbotMageAI::PlayerbotMageAI(Player* const master, Player* const bot, Player
 }
 PlayerbotMageAI::~PlayerbotMageAI() {}
 
+
+// Simple Frost Mage strat
+void PlayerbotMageAI::DoNextFrost(Unit *pTarget) {
+    PlayerbotAI* ai = GetAI();
+    if (FROSTBOLT > 0 && LastSpellFrost < 3 && ai->GetManaPercent() >= 13) {
+        ai->CastSpell(FROSTBOLT, *pTarget);
+        ai->SetIgnoreUpdateTime(3);
+        SAY("casting frostbolt");
+        ++LastSpellFrost;
+    }
+    else if (SUMMON_WATER_ELEMENTAL > 0 && ai->GetManaPercent() >= 16
+             && ai->CastSpell(SUMMON_WATER_ELEMENTAL)) {
+        SAY ("Summoning water elemental");
+    }
+    else if (FIREBALL > 0 && ai->GetManaPercent() >= 23) {
+        ai->CastSpell(FIREBALL, *pTarget);
+        ai->SetIgnoreUpdateTime(4);
+        SAY("casting fireball");
+        LastSpellFrost = 0;
+    }
+    else if (ai->GetManaPercent() < 5) {
+        ai->CastSpell("shoot");
+        SAY("shooting");
+    }
+}
+
+
 void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget){
 	PlayerbotAI* ai = GetAI();
 	if (!ai) return;
 	switch (ai->GetScenarioType()) {
-		case SCENARIO_DUEL: 
+		case SCENARIO_DUEL:
 
 			if (FIREBALL > 0) {
 				ai->CastSpell(FIREBALL);
@@ -60,7 +87,12 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget){
 
 	// ------- Non Duel combat ----------
 
-	ai->Follow(*GetMaster()); // dont want to melee mob
+	//ai->Follow(*GetMaster()); // dont want to melee mob
+
+    if (m_strat == MAGESTRATEGY_FROST) {
+        DoNextFrost(pTarget);
+        return;
+    }
 
 	// Damage Spells (primitive example)
 
@@ -294,17 +326,18 @@ void PlayerbotMageAI::DoNonCombatActions() {
 	PlayerbotAI* ai = GetAI();
 
 	SpellSequence = SPELL_FROST;
+    LastSpellFrost = 0;
 
 	// buff myself
 
-	if (DALARAN_INTELLECT > 0) { 
+	if (DALARAN_INTELLECT > 0) {
 		(!bot->HasAura(DALARAN_INTELLECT, 0) && ai->CastSpell (DALARAN_INTELLECT, *bot));
 	}
-	else if (ARCANE_INTELLECT > 0) { 
+	else if (ARCANE_INTELLECT > 0) {
 		(!bot->HasAura(ARCANE_INTELLECT, 0) && ai->CastSpell (ARCANE_INTELLECT, *bot));
 	}
-  
-	if (ICE_ARMOR > 0) { 
+
+	if (ICE_ARMOR > 0) {
 		(!bot->HasAura(ICE_ARMOR, 0) && ai->CastSpell (ICE_ARMOR, *bot));
 	}
 	else if (FROST_ARMOR > 0) {
@@ -313,12 +346,26 @@ void PlayerbotMageAI::DoNonCombatActions() {
 
 	// buff master
 
-	if (DALARAN_INTELLECT > 0) { 
+	if (DALARAN_INTELLECT > 0) {
 		(!GetMaster()->HasAura(DALARAN_INTELLECT, 0) && ai->CastSpell (DALARAN_INTELLECT, *(GetMaster())) );
-	}	
-	else if (ARCANE_INTELLECT > 0) { 
+	}
+	else if (ARCANE_INTELLECT > 0) {
 		(!GetMaster()->HasAura(ARCANE_INTELLECT, 0) && ai->CastSpell (ARCANE_INTELLECT, *(GetMaster())) );
 	}
+
+    // Buff Group
+    Group *g = bot->GetGroup();
+    if (g && ai->GetBaseManaPercent() > 20)
+    {
+        for(GroupReference *itr = g->GetFirstMember(); itr != NULL; itr = itr->next())
+        {
+            Player *pPlayer = itr->getSource();
+            if (pPlayer->getPowerType() == POWER_MANA
+                && !pPlayer->HasAura(ARCANE_INTELLECT, 0)
+                && ai->CastSpell(ARCANE_INTELLECT, *pPlayer))
+                return;
+        }
+    }
 
 	// conjure food & water
 
@@ -332,13 +379,26 @@ void PlayerbotMageAI::DoNonCombatActions() {
 		ai->CastSpell(CONJURE_FOOD, *bot);
         return;
 	}
-    if (ai->GetManaPercent() < 15 || ai->GetHealthPercent() < 15) {
-		ai->Feast();
-		return;
-	}
 
+    PlayerbotClassAI::DoNonCombatActions();
 } // end DoNonCombatActions
 
 void PlayerbotMageAI::BuffPlayer(Player* target) {
 	GetAI()->CastSpell(ARCANE_INTELLECT, *target);
+}
+
+
+// Handle Mage specific commands
+// "frost" - do frost only dmg
+// "mixdmg" - do mixed damage
+bool PlayerbotMageAI::HandleCommand(const std::string& text, Player& fromPlayer) {
+    if (text == "frost") {
+        m_strat = MAGESTRATEGY_FROST;
+        return true;
+    }
+    else if (text == "mixdmg") {
+        m_strat = MAGESTRATEGY_MIXED;
+        return true;
+    }
+    return false;
 }

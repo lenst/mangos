@@ -28,6 +28,9 @@ class MANGOS_DLL_SPEC PlayerbotClassAI  {
   // buff a specific player, usually a real PC who is not in group
   virtual void BuffPlayer(Player* target);
 
+  // from a whisper or from the party channel, return true if handled
+  virtual bool HandleCommand(const std::string& text, Player& fromPlayer);
+
   // Utilities
   Player* GetMaster () {return m_master;}
   Player* GetPlayerBot() {return m_bot;}

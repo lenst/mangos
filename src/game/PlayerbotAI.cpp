@@ -4,6 +4,7 @@
 #include "World.h"
 #include "SpellMgr.h"
 #include "PlayerbotAI.h"
+#include "PlayerbotDruidAI.h"
 #include "PlayerbotPriestAI.h"
 #include "PlayerbotMageAI.h"
 #include "PlayerbotWarlockAI.h"
@@ -73,10 +74,26 @@ PlayerbotAI::PlayerbotAI(Player* const master, Player* const bot):
     case CLASS_ROGUE:
         m_classAI = (PlayerbotClassAI*)new PlayerbotRogueAI(master, m_bot, this);
         break;
+    case CLASS_DRUID:
+        m_classAI = (PlayerbotClassAI*)new PlayerbotDruidAI(master, m_bot, this);
+        break;
+    default:
+        m_classAI = new PlayerbotClassAI(master, m_bot, this);
     }
 }
 
 PlayerbotAI::~PlayerbotAI() {}
+
+
+const char* RoleText(RoleType role) {
+    switch (role) {
+    case ROLE_MIXED: return "mixed";
+    case ROLE_DPS: return "dps";
+    case ROLE_HEALER: return "healer";
+    default: return "unknown";
+    }
+}
+
 
 // finds spell ID for matching substring args
 // in priority of full text match, spells not taking reagents, and highest rank
@@ -291,6 +308,7 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
             }
             { 	std::ostringstream out;
                 out << "m_IsFollowingMaster: " << pBot->m_IsFollowingMaster;
+                out << "  m_role: " << RoleText(pBot->m_role);
                 ch.SendSysMessage(out.str().c_str());
             }
             { 	std::ostringstream out;
@@ -990,16 +1008,7 @@ void PlayerbotAI::DoNextCombatManeuver() {
         return;
     }
 
-    if (GetClassAI()) {
-        (GetClassAI())->DoNextCombatManeuver(pTarget);
-        return;
-    }
-
-    switch(m_bot->getClass()) {
-    case CLASS_DRUID:
-        CastSpell("moonfire") || CastSpell("roots") ||  CastSpell("wrath");
-        break;
-    }
+    m_classAI->DoNextCombatManeuver(pTarget);
 }
 
 // this is where the AI should go
@@ -1097,7 +1106,9 @@ bool PlayerbotAI::CastSpell(uint32 spellId) {
     // don't allow bot to cast damage spells on friends
     const SpellEntry* const pSpellInfo = sSpellStore.LookupEntry(spellId);
     if (! pSpellInfo) {
-    	TellMaster("missing spell entry in CastSpell.");
+        std::ostringstream msg;
+        msg << "missing spell entry in CastSpell: " << spellId;
+    	TellMaster(msg.str());
     	return false;
     }
 
@@ -1130,7 +1141,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId) {
 
     m_CurrentlyCastingSpellId = spellId;
     // m_ignoreAIUpdatesUntilTime = time(0) + pSpell->GetCastTime() + 3;
-    m_ignoreAIUpdatesUntilTime = time(0) + 6;
+    m_ignoreAIUpdatesUntilTime = time(0) + 5;
 
     // if this caused the caster to move (blink) update the position
     // I think this is normally done on the client
@@ -1372,6 +1383,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer) {
     if (text.find("LOOT_OPENED")!=std::wstring::npos) return;
     if (text.find("CTRA")!=std::wstring::npos) return;
     if (text.find("Crb\t")!=std::wstring::npos) return;
+    if (text.find("HealComm")!=std::wstring::npos) return;
 
     // if message is not from a player in the masters account auto reply and ignore
     if (! canObeyCommandFrom(fromPlayer)) {
@@ -1398,6 +1410,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer) {
         }
     }
 
+    // Let class AI have a first go
+    else if (m_classAI->HandleCommand(text, fromPlayer))
+        return;
     else if (text == "quiet")
         m_quiet = true;
     else if (text == "speak")
@@ -1415,6 +1430,9 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer) {
 
     else if (text == "stay" || text == "stop")
         Stay();
+
+    else if (text == "hold")
+        m_combatOrder = ORDERS_NONE;
 
     else if (text == "attack") {
         uint64 attackOnGuid = fromPlayer.GetSelection();
@@ -1522,9 +1540,10 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer) {
 
     else {
         sLog.outString ("Bot got unk msg: %s", text.c_str());
-
-        std::string msg = "What? follow, stay, (c)ast <spellname>, spells, (e)quip, (u)se.";
-        SendWhisper(msg, fromPlayer);
-        m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
+        if (!m_quiet) {
+            std::string msg = "What? follow, stay, (c)ast <spellname>, spells, (e)quip, (u)se.";
+            SendWhisper(msg, fromPlayer);
+            m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
+        }
     }
 }
