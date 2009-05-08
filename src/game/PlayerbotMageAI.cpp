@@ -321,22 +321,6 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget){
 
 } // end DoNextCombatManeuver
 
-// Group Buff Utilitiy
-bool PlayerbotMageAI::BuffGroup(uint32 spellId, bool manaUserOnly) {
-	Player* bot = GetPlayerBot();
-	PlayerbotAI* ai = GetAI();
-    Group *g = bot->GetGroup();
-    if (!g) return false;
-    for (GroupReference *itr = g->GetFirstMember(); itr != NULL; itr = itr->next())
-    {
-        Player *pPlayer = itr->getSource();
-        if ((!manaUserOnly || pPlayer->getPowerType() == POWER_MANA)
-            && !pPlayer->HasAura(spellId, 0)
-            && ai->CastSpell(spellId, *pPlayer))
-            return true;
-    }
-    return false;
-}
 
 void PlayerbotMageAI::DoNonCombatActions() {
 	Player* bot = GetPlayerBot();

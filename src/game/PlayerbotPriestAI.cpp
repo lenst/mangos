@@ -344,11 +344,7 @@ void PlayerbotPriestAI::DoNonCombatActions() {
         (m_bot->getRace()==5 /* undead */ && GetAI()->CastSpell (TOUCH_OF_WEAKNESS, *m_bot));
     }
 
-    // buff master
-
-    if (FORTITUDE > 0) {
-        (!GetMaster()->HasAura(FORTITUDE,0) && GetAI()->CastSpell (FORTITUDE, *(GetMaster())) );
-    }
+    BuffGroup(FORTITUDE, false);
 
     PlayerbotClassAI::DoNonCombatActions();
 } // end DoNonCombatActions

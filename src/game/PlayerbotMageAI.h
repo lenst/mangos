@@ -37,9 +37,6 @@ class MANGOS_DLL_SPEC PlayerbotMageAI : PlayerbotClassAI {
         // display class specific info in response to a /bonk
         void TextemotBonk(ChatHandler &ch);
 
-        // Utilities
-        bool BuffGroup(uint32 spellId, bool manaUserOnly = false);
-
 	private:
         void DoNextFrost(Unit*);
 

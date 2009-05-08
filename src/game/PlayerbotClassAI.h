@@ -39,7 +39,7 @@ class MANGOS_DLL_SPEC PlayerbotClassAI  {
   Player* GetMaster () {return m_master;}
   Player* GetPlayerBot() {return m_bot;}
   PlayerbotAI* GetAI (){return m_ai;};
-		
+  bool BuffGroup(uint32 spellId, bool manaUserOnly = false);
 
  private:
   Player* m_master;

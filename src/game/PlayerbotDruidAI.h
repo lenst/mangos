@@ -13,7 +13,7 @@ class MANGOS_DLL_SPEC PlayerbotDruidAI : PlayerbotClassAI {
 		void DoNextCombatManeuver(Unit*);
 
 		// all non combat actions go here, ex buffs, heals, rezzes
-		//void DoNonCombatActions();
+		void DoNonCombatActions();
 
 		// buff a specific player, usually a real PC who is not in group
 		//void BuffPlayer(Player *target);
@@ -23,6 +23,8 @@ class MANGOS_DLL_SPEC PlayerbotDruidAI : PlayerbotClassAI {
         
 	private:
 
+        // resto
+        uint32 MARK_OF_THE_WILD;
 
 };
 
