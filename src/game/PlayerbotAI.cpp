@@ -324,6 +324,8 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
                 out << "IsCharmed() " << pBot->m_bot->isCharmed();
                 ch.SendSysMessage(out.str().c_str());
             }
+            // Place for Class specific info
+            pBot->GetClassAI()->TextemotBonk(ch);
             return;
         }
 

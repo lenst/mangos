@@ -26,3 +26,4 @@ bool PlayerbotClassAI::HandleCommand(const std::string& text, Player& fromPlayer
     return false;
 }
     
+void PlayerbotClassAI::TextemotBonk(ChatHandler &ch) {};

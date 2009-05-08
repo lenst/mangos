@@ -9,6 +9,7 @@
 #include "WorldPacket.h"
 #include "Unit.h"
 #include "SharedDefines.h"
+#include "Chat.h"
 #include "PlayerbotAI.h"
 
 class Player;
@@ -30,6 +31,9 @@ class MANGOS_DLL_SPEC PlayerbotClassAI  {
 
   // from a whisper or from the party channel, return true if handled
   virtual bool HandleCommand(const std::string& text, Player& fromPlayer);
+
+  // display class specific info in response to a /bonk
+  virtual void TextemotBonk(ChatHandler &ch);
 
   // Utilities
   Player* GetMaster () {return m_master;}

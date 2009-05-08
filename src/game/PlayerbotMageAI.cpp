@@ -321,6 +321,23 @@ void PlayerbotMageAI::DoNextCombatManeuver(Unit *pTarget){
 
 } // end DoNextCombatManeuver
 
+// Group Buff Utilitiy
+bool PlayerbotMageAI::BuffGroup(uint32 spellId, bool manaUserOnly) {
+	Player* bot = GetPlayerBot();
+	PlayerbotAI* ai = GetAI();
+    Group *g = bot->GetGroup();
+    if (!g) return false;
+    for (GroupReference *itr = g->GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        Player *pPlayer = itr->getSource();
+        if ((!manaUserOnly || pPlayer->getPowerType() == POWER_MANA)
+            && !pPlayer->HasAura(spellId, 0)
+            && ai->CastSpell(spellId, *pPlayer))
+            return true;
+    }
+    return false;
+}
+
 void PlayerbotMageAI::DoNonCombatActions() {
 	Player* bot = GetPlayerBot();
 	PlayerbotAI* ai = GetAI();
@@ -354,18 +371,8 @@ void PlayerbotMageAI::DoNonCombatActions() {
 	}
 
     // Buff Group
-    Group *g = bot->GetGroup();
-    if (g && ai->GetBaseManaPercent() > 20)
-    {
-        for(GroupReference *itr = g->GetFirstMember(); itr != NULL; itr = itr->next())
-        {
-            Player *pPlayer = itr->getSource();
-            if (pPlayer->getPowerType() == POWER_MANA
-                && !pPlayer->HasAura(ARCANE_INTELLECT, 0)
-                && ai->CastSpell(ARCANE_INTELLECT, *pPlayer))
-                return;
-        }
-    }
+    if (ai->GetBaseManaPercent() > 20 && BuffGroup(ARCANE_INTELLECT, true))
+        return;
 
 	// conjure food & water
 
@@ -401,4 +408,18 @@ bool PlayerbotMageAI::HandleCommand(const std::string& text, Player& fromPlayer)
         return true;
     }
     return false;
+}
+
+
+// display class specific info in response to a /bonk
+void PlayerbotMageAI::TextemotBonk(ChatHandler &ch) {
+    const char *text = "mixdmg";
+    switch (m_strat) {
+    case MAGESTRATEGY_FROST:
+        text = "frost";
+        break;
+    }
+    std::ostringstream out;
+    out << "m_strat: " << text;
+    ch.SendSysMessage(out.str().c_str());
 }

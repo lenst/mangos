@@ -32,7 +32,13 @@ class MANGOS_DLL_SPEC PlayerbotMageAI : PlayerbotClassAI {
 		void BuffPlayer(Player *target);
 
         // from a whisper or from the party channel, return true if handled
-        virtual bool HandleCommand(const std::string& text, Player& fromPlayer);
+        bool HandleCommand(const std::string& text, Player& fromPlayer);
+
+        // display class specific info in response to a /bonk
+        void TextemotBonk(ChatHandler &ch);
+
+        // Utilities
+        bool BuffGroup(uint32 spellId, bool manaUserOnly = false);
 
 	private:
         void DoNextFrost(Unit*);
