@@ -45,8 +45,7 @@ bool PlayerbotWarlockAI::CastDot(uint32 spellId, Unit *pTarget, int min_mana, in
     if (spellId > 0 && ai->GetManaPercent() >= min_mana) {
         if (!ai->HasAura(spellId, *pTarget)) {
             ai->CastSpell(spellId, *pTarget);
-            if (castTime != 2)
-                ai->SetIgnoreUpdateTime(castTime);
+            ai->SetIgnoreUpdateTime(castTime);
             return true;
         }
     }
@@ -67,7 +66,7 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget){
 
     // ------- Non Duel combat ----------
 
-    ai->Follow(*GetMaster()); // dont want to melee mob
+    ///ai->Follow(*GetMaster()); // dont want to melee mob
 
     // Damage Spells
 
@@ -85,7 +84,7 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget){
     if (!dotted) {
         do {
             if (DARK_PACT > 0 && ai->GetManaPercent() < 15) {
-                ai->CastSpell(DARK_PACT, *pTarget);
+                ai->CastSpell(DARK_PACT);
                 SAY("Casting Dark Pact");
                 break;
             }
