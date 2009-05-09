@@ -397,11 +397,11 @@ void PlayerbotAI::HandleBotOutgoingPacketNow(const WorldPacket& packet) {
             return;
 
         m_bot->SetSemaphoreTeleportNear(false);
+        m_bot->GetMotionMaster()->Clear(true);
 
         uint32 old_zone = m_bot->GetZoneId();
 
-        WorldLocation const& dest = m_master->GetTeleportDest();
-
+        WorldLocation const& dest = m_bot->GetTeleportDest();
         m_bot->SetPosition(dest.x, dest.y, dest.z, dest.o, true);
 
         uint32 newzone, newarea;

@@ -67,6 +67,10 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     // relocate the player to the teleport destination
     GetPlayer()->SetMapId(loc.mapid);
     GetPlayer()->Relocate(loc.x, loc.y, loc.z, loc.o);
+    // Playerbot:
+    GetPlayer()->GetMotionMaster()->Clear(true);
+    sLog.outDebug("FarTeleport mapid %d x %f y %f z %f", loc.mapid, loc.x, loc.y, loc.z );
+    //-----------
 
     // since the MapId is set before the GetInstance call, the InstanceId must be set to 0
     // to let GetInstance() determine the proper InstanceId based on the player's binds
