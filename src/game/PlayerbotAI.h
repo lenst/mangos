@@ -2,6 +2,7 @@
 #define _PLAYERBOTAI_H
 
 #include "Common.h"
+#include <queue>
 
 class WorldPacket;
 class Player;
@@ -44,6 +45,8 @@ class MANGOS_DLL_SPEC PlayerbotAI {
   // Since there is no client at the other end, the packets are dropped of course.
   // For a list of opcodes that can be caught see Opcodes.cpp (SMSG_* opcodes only)
   void HandleBotOutgoingPacket(const WorldPacket& packet);
+  //
+  void HandleBotOutgoingPacketNow(const WorldPacket& packet);  
 
   // This is called whenever the master sends a packet to the server.
   // These packets can be viewed, but not edited.
@@ -170,6 +173,10 @@ class MANGOS_DLL_SPEC PlayerbotAI {
   // can do it
   uint32 m_spellIdCommand;
   uint64 m_targetGuidCommand;
+
+  // Outgoing packets are to be handled async
+  std::queue<WorldPacket> m_outgoing_queue;
+
 };
 
 #endif

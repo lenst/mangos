@@ -387,6 +387,10 @@ void PlayerbotAI::HandleMasterIncomingPacket(const WorldPacket& packet, WorldSes
 
 // handle outgoing packets the server would send to the client
 void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet) {
+    m_outgoing_queue.push(packet);
+}
+
+void PlayerbotAI::HandleBotOutgoingPacketNow(const WorldPacket& packet) {
     switch(packet.GetOpcode()) {
     case MSG_MOVE_TELEPORT_ACK: {
         if (!m_bot->IsBeingTeleportedNear())
@@ -1023,6 +1027,11 @@ void PlayerbotAI::DoNextCombatManeuver() {
 // hasAuraType
 
 void PlayerbotAI::UpdateAI(const uint32 p_time) {
+    while (!m_outgoing_queue.empty()) {
+        HandleBotOutgoingPacketNow(m_outgoing_queue.front());
+        m_outgoing_queue.pop();
+    }
+
     time_t currentTime = time(0);
     if (currentTime < m_ignoreAIUpdatesUntilTime || m_bot->IsBeingTeleported() || m_bot->GetTrader()) return;
 
