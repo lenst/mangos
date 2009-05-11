@@ -1240,6 +1240,19 @@ uint32 PlayerbotAI::extractMoney(const std::string& text) const {
 // also removes found item IDs from itemIdSearchList when found
 void PlayerbotAI::findItemsInInv(std::list<uint32>& itemIdSearchList, std::list<Item*>& foundItemList) const {
 
+    // look for equiped items
+    for (uint8 slot=EQUIPMENT_SLOT_START; itemIdSearchList.size() > 0 &&
+             slot < EQUIPMENT_SLOT_END; ++slot) {
+        Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+        if (!pItem) continue;
+        for (std::list<uint32>::iterator it = itemIdSearchList.begin(); it != itemIdSearchList.end(); ++it) {
+            if (pItem->GetProto()->ItemId != *it) continue;
+            foundItemList.push_back(pItem);
+            itemIdSearchList.erase(it);
+            break;
+        }
+    }
+
     // look for items in main bag
     for (uint8 slot=INVENTORY_SLOT_ITEM_START; itemIdSearchList.size() > 0 &&
              slot < INVENTORY_SLOT_ITEM_END; ++slot) {
@@ -1313,8 +1326,16 @@ void PlayerbotAI::EquipItem(Item& item) {
 
 // submits packet to trade an item (trade window must already be open)
 bool PlayerbotAI::TradeItem(const Item& item) {
-    if (! m_bot->GetTrader() || item.IsInTrade() || ! item.CanBeTraded())
+    if (! m_bot->GetTrader() || item.IsInTrade())
         return false;
+    if (! item.CanBeTraded()) {
+        const ItemPrototype* const pItemProto = item.GetProto();
+        sLog.outDebug("Non-traded item: %s", pItemProto->Name1);
+        WorldPacket* const packet = new WorldPacket(CMSG_SET_TRADE_ITEM, 3);
+        *packet << (uint8) TRADE_SLOT_NONTRADED << (uint8) item.GetBagSlot() << (uint8) item.GetSlot();
+        m_bot->GetSession()->QueuePacket(packet);
+        return true;
+    }
     for (uint8 i=0; i < TRADE_SLOT_TRADED_COUNT; ++i) {
         if (m_bot->GetItemPosByTradeSlot(i) == NULL_SLOT) {
             WorldPacket* const packet = new WorldPacket(CMSG_SET_TRADE_ITEM, 3);
