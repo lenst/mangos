@@ -1550,7 +1550,7 @@ void PlayerbotAI::HandleCommand(const std::string& text, Player& fromPlayer) {
     }
 
     else {
-        sLog.outString ("Bot got unk msg: %s", text.c_str());
+        sLog.outDebug("Bot got unk msg: %s", text.c_str());
         if (!m_quiet) {
             std::string msg = "What? follow, stay, (c)ast <spellname>, spells, (e)quip, (u)se.";
             SendWhisper(msg, fromPlayer);

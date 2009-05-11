@@ -4,16 +4,9 @@
 class PlayerbotAI;
 PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, PlayerbotAI* const ai): PlayerbotClassAI(master, bot, ai) {
     RENEW = ai->getSpellId("renew");
-    if((HEAL = ai->getSpellId ("greater heal"))>0) {
-        HEAL = ai->getSpellId("greater heal");
-    }
-    else if((HEAL = ai->getSpellId ("heal"))>0 && (HEAL = ai->getSpellId ("greater heal"))==0) {
-        HEAL = ai->getSpellId("heal");
-    }
-    else if((HEAL = ai->getSpellId ("greater heal"))==0 && (HEAL = ai->getSpellId ("heal"))==0) {
-        HEAL = ai->getSpellId("lesser heal");
-    }
-
+    HEAL = ai->getSpellId("greater heal");
+    if (HEAL == 0) HEAL = ai->getSpellId("heal");
+    if (HEAL == 0) HEAL = ai->getSpellId("lesser heal");
     FLASH_HEAL = ai->getSpellId("flash heal");
     REZZ = ai->getSpellId("resurrection");
     SMITE = ai->getSpellId("smite");
@@ -39,19 +32,15 @@ PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, Pl
     //DISCIPLINE
     INNER_FIRE = ai->getSpellId("inner fire");
     PWS = ai->getSpellId("power word: shield");
-    if((FORTITUDE = ai->getSpellId ("prayer of fortitude"))==1)
-        FORTITUDE = ai->getSpellId("prayer of fortitude");
-    if((FORTITUDE = ai->getSpellId ("power word: fortitude"))==1 && (FORTITUDE = ai->getSpellId ("prayer of fortitude"))==0)
-        FORTITUDE = ai->getSpellId("power word: fortitude");
+    FORTITUDE = ai->getSpellId("prayer of fortitude");
+    if (FORTITUDE == 0) FORTITUDE = ai->getSpellId("power word: fortitude");
     TOUCH_OF_WEAKNESS = ai->getSpellId("touch of weakness");
     FEAR_WARD = ai->getSpellId("fear ward");
-    if((DSPIRIT = ai->getSpellId ("prayer of spirit"))==1)
-        DSPIRIT = ai->getSpellId("prayer of spirit");
-    if((DSPIRIT = ai->getSpellId ("divine spirit"))==1 && (DSPIRIT = ai->getSpellId ("prayer of spirit"))==0)
-        DSPIRIT = ai->getSpellId("divine spirit");
+    DSPIRIT = ai->getSpellId("prayer of spirit");
+    if (DSPIRIT == 0) DSPIRIT = ai->getSpellId("divine spirit");
     MASS_DISPEL = ai->getSpellId("mass dispel");
-
 }
+
 PlayerbotPriestAI::~PlayerbotPriestAI() {}
 
 void PlayerbotPriestAI::HealTarget(Unit &target, uint8 hp){
@@ -64,27 +53,22 @@ void PlayerbotPriestAI::HealTarget(Unit &target, uint8 hp){
     if (hp < 25 && FLASH_HEAL > 0 && ai->GetManaPercent() >= 20) {
         SAY("I'm casting flash heal.");
         ai->CastSpell(FLASH_HEAL, target);
-
     }
     else if (hp < 33 && BINDING_HEAL > 0 && ai->GetManaPercent() >= 27) {
         SAY("I'm casting binding heal.");
         ai->CastSpell(BINDING_HEAL, target);
-
     }
     else if (hp < 40 && PRAYER_OF_HEALING > 0 && ai->GetManaPercent() >= 54) {
         SAY("I'm casting prayer of healing.");
         ai->CastSpell(PRAYER_OF_HEALING, target);
-
     }
     else if (hp < 50 && CIRCLE_OF_HEALING > 0 && ai->GetManaPercent() >= 24) {
         SAY("I'm casting circle of healing.");
         ai->CastSpell(CIRCLE_OF_HEALING, target);
-
     }
     else if (hp < 60 && HEAL > 0 && ai->GetManaPercent() >= 36) {
         SAY("I'm casting one of the sorted heal spells.");
         ai->CastSpell(HEAL, target);
-
     }
     else if (hp < 80 && RENEW > 0 && ai->GetManaPercent() >= 19) {
         if (ai->CastSpell(RENEW, target))
@@ -118,15 +102,17 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget){
 
     // Heal myself
 
-    if (ai->GetHealthPercent() < 15 && FADE > 0 && !bot->HasAura(FADE, 0)
-        && bot->isAlive() ) {
+    if (ai->GetHealthPercent() < 15 && FADE > 0 && bot->isAlive()
+        && ai->CastSpell(FADE)) {
         SAY("I'm casting fade");
-        ai->CastSpell(FADE);
+        ai->SetIgnoreUpdateTime(1);
+        return;
     }
-    else if (ai->GetHealthPercent() < 25 && PWS > 0 && !bot->HasAura(PWS, 0)) {
+    else if (ai->GetHealthPercent() < 25 && PWS > 0
+        && ai->CastSpell(PWS)) {
         SAY("I'm casting pws on myself.");
-        ai->CastSpell(PWS);
-
+        ai->SetIgnoreUpdateTime(1);
+        return;
     }
     else if (ai->GetHealthPercent() < 80) {
         HealTarget (*bot, ai->GetHealthPercent());
@@ -147,7 +133,7 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget){
             }
         }
     }
-    
+
 
     if (ai->GetRole() == ROLE_HEALER)
         return;

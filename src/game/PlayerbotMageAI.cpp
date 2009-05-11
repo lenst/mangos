@@ -50,18 +50,28 @@ PlayerbotMageAI::~PlayerbotMageAI() {}
 // Simple Frost Mage strat
 void PlayerbotMageAI::DoNextFrost(Unit *pTarget) {
     PlayerbotAI* ai = GetAI();
-    if (FROSTBOLT > 0 && LastSpellFrost < 3 && ai->GetManaPercent() >= 13) {
-        ai->CastSpell(FROSTBOLT, *pTarget);
+    if (FIREBLAST > 0 && ai->CastSpell(FIREBLAST, *pTarget)) {
+        SAY("casting fire blast");
+    }
+    else if (FROSTBOLT > 0 && LastSpellFrost < 3 && ai->GetManaPercent() >= 13
+             && ai->CastSpell(FROSTBOLT, *pTarget))
+    {
         ai->SetIgnoreUpdateTime(3);
         SAY("casting frostbolt");
+        ++LastSpellFrost;
+    }
+    else if (CONE_OF_COLD > 0 && ai->GetManaPercent() >= 35
+             && ai->CastSpell(CONE_OF_COLD, *pTarget)) {
+        SAY("casting cone of cold");
         ++LastSpellFrost;
     }
     else if (SUMMON_WATER_ELEMENTAL > 0 && ai->GetManaPercent() >= 16
              && ai->CastSpell(SUMMON_WATER_ELEMENTAL)) {
         SAY ("Summoning water elemental");
+        LastSpellFrost = 0;
     }
-    else if (FIREBALL > 0 && ai->GetManaPercent() >= 23) {
-        ai->CastSpell(FIREBALL, *pTarget);
+    else if (FIREBALL > 0 && ai->GetManaPercent() >= 23
+             && ai->CastSpell(FIREBALL, *pTarget)) {
         ai->SetIgnoreUpdateTime(4);
         SAY("casting fireball");
         LastSpellFrost = 0;
@@ -70,6 +80,8 @@ void PlayerbotMageAI::DoNextFrost(Unit *pTarget) {
         ai->CastSpell("shoot");
         SAY("shooting");
     }
+    else
+        LastSpellFrost = 0;
 }
 
 
