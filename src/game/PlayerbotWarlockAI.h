@@ -45,7 +45,8 @@ class MANGOS_DLL_SPEC PlayerbotWarlockAI : PlayerbotClassAI {
 
   uint32 SpellSequence, LastSpellCurse, LastSpellAffliction, LastSpellDestruction;
 
-
+  // Things to avoid
+  uint32 SPELL_REFLECTION;
 };
 
 #endif

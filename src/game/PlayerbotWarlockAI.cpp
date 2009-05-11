@@ -35,6 +35,9 @@ PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, 
     SUMMON_SUCCUBUS = ai->getSpellId("summon succubus"); //DEMONOLOGY
     SUMMON_FELHUNTER = ai->getSpellId("summon fellhunter"); //DEMONOLOGY
     SUMMON_FELGUARD = ai->getSpellId("summon fellguard"); //DEMONOLOGY
+
+    // there are really more than one..
+    SPELL_REFLECTION = 35399;
 }
 PlayerbotWarlockAI::~PlayerbotWarlockAI() {}
 
@@ -75,12 +78,14 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget){
         m_bot->SetInFront(pTarget);
     }
 
+    if (pTarget->HasAura(SPELL_REFLECTION))
+        return;
     bool dotted = CastDot(CURSE_OF_AGONY, pTarget, 14, 1)
         || CastDot(CORRUPTION, pTarget, 19, 1)
         || CastDot(SIPHON_LIFE, pTarget, 22, 1)
         || CastDot(UNSTABLE_AFFLICTION, pTarget, 20, 2)
         || CastDot(HAUNT, pTarget, 20, 2);
-    
+
     if (!dotted) {
         do {
             if (DARK_PACT > 0 && ai->GetManaPercent() < 15) {
@@ -112,7 +117,7 @@ void PlayerbotWarlockAI::DoNextCombatManeuver(Unit *pTarget){
             }
             LastSpellDestruction = 0;
         } while(0);
-    } 
+    }
 
 } // end DoNextCombatManeuver
 
