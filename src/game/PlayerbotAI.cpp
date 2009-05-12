@@ -900,7 +900,10 @@ Item* PlayerbotAI::FindBandage() const {
 
 void PlayerbotAI::InterruptCurrentCastingSpell() {
     TellMaster("I'm interrupting my current spell!");
-    WorldPacket* const packet = new WorldPacket(CMSG_CANCEL_CAST,4);
+    sLog.outDebug("Playerbot: spell interrupt at %d", (int) time(0));
+    WorldPacket* const packet = new WorldPacket(CMSG_CANCEL_CAST,5);
+    uint8 counter = 1;
+    *packet << counter;
     *packet << m_CurrentlyCastingSpellId;
     m_CurrentlyCastingSpellId = 0;
     m_bot->GetSession()->QueuePacket(packet);
