@@ -1152,8 +1152,13 @@ bool PlayerbotAI::CastSpell(uint32 spellId) {
 
     m_CurrentlyCastingSpellId = spellId;
     // m_ignoreAIUpdatesUntilTime = time(0) + pSpell->GetCastTime() + 3;
-    m_ignoreAIUpdatesUntilTime = time(0) + 5;
-
+    int32 castTime = pSpell->GetCastTime();
+    sLog.outDebug("Playerbot: cast %d castTime %d", spellId, castTime);
+    if (castTime < 3000 || castTime > 20000)
+        m_ignoreAIUpdatesUntilTime = time(0) + 4;
+    else
+        m_ignoreAIUpdatesUntilTime = time(0) + castTime/1000 + 1;
+    
     // if this caused the caster to move (blink) update the position
     // I think this is normally done on the client
     // this should be done on spell success
