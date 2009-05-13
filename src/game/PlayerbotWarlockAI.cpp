@@ -13,6 +13,7 @@ PlayerbotWarlockAI::PlayerbotWarlockAI(Player* const master, Player* const bot, 
     SHADOWFURY = ai->getSpellId("shadowfury");
     CORRUPTION = ai->getSpellId("corruption"); //affliction
     DARK_PACT = ai->getSpellId("dark pact");
+    LIFE_TAP = ai->getSpellId("life tap");
     CURSE_OF_WEAKNESS = ai->getSpellId("curse of weakness"); //CURSE
     CHAOS_BOLT = ai->getSpellId("chaos bolt");
     CURSE_OF_AGONY = ai->getSpellId("curse of agony"); //CURSE
@@ -126,6 +127,12 @@ void PlayerbotWarlockAI::DoNonCombatActions(){
     if (!bot) return;
 
     SpellSequence = SPELL_CURSES;
+
+    if (LIFE_TAP > 0
+        && GetAI()->GetHealthPercent() > 98
+        && GetAI()->GetManaPercent() < 60
+        && GetAI()->CastSpell(LIFE_TAP, *bot))
+        return;
 
     // buff myself  DEMON_SKIN, DEMON_ARMOR, SHADOW_WARD, FEL_ARMOR
 
