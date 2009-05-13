@@ -1010,7 +1010,8 @@ void PlayerbotAI::DoNextCombatManeuver() {
 
     // if current order doesn't make sense anymore
     // clear our orders so we can get orders in next update
-    if (!pTarget || pTarget->isDead() || !pTarget->IsInWorld() || !m_bot->IsHostileTo(pTarget)) {
+    if (!pTarget || pTarget->isDead() || !pTarget->IsInWorld() || !m_bot->IsHostileTo(pTarget)
+        || m_bot->isDead()) {
         m_combatOrder = ORDERS_NONE;
         m_bot->SetSelection(0);
         m_bot->GetMotionMaster()->Clear(true);
