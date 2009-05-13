@@ -32,13 +32,15 @@ PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, Pl
     //DISCIPLINE
     INNER_FIRE = ai->getSpellId("inner fire");
     PWS = ai->getSpellId("power word: shield");
-    FORTITUDE = ai->getSpellId("prayer of fortitude");
-    if (FORTITUDE == 0) FORTITUDE = ai->getSpellId("power word: fortitude");
+    PRAYER_FORTITUDE = ai->getSpellId("prayer of fortitude");
+    FORTITUDE = ai->getSpellId("power word: fortitude");
     TOUCH_OF_WEAKNESS = ai->getSpellId("touch of weakness");
     FEAR_WARD = ai->getSpellId("fear ward");
     DSPIRIT = ai->getSpellId("prayer of spirit");
     if (DSPIRIT == 0) DSPIRIT = ai->getSpellId("divine spirit");
     MASS_DISPEL = ai->getSpellId("mass dispel");
+    HOLY_FIRE = ai->getSpellId("holy fire");
+    POWER_INFUSION = ai->getSpellId("power infusion");
 }
 
 PlayerbotPriestAI::~PlayerbotPriestAI() {}
