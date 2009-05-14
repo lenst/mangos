@@ -39,7 +39,8 @@ class MANGOS_DLL_SPEC PlayerbotClassAI  {
   Player* GetMaster () {return m_master;}
   Player* GetPlayerBot() {return m_bot;}
   PlayerbotAI* GetAI (){return m_ai;};
-  bool BuffGroup(uint32 spellId, bool manaUserOnly = false);
+  bool BuffGroup(uint32 spellId, bool manaUserOnly = false,
+                 uint32 groupBuffId = 0);
 
  private:
   Player* m_master;
@@ -48,5 +49,10 @@ class MANGOS_DLL_SPEC PlayerbotClassAI  {
 };
 
 #define SAY(m) if (!GetAI()->GetQuiet()) {GetAI()->TellMaster((m));}
+
+#define DOGROUP(pPlayer) \
+    for (Group *grp_ = GetPlayerBot()->GetGroup(); grp_ != NULL; grp_ = NULL) \
+        for (GroupReference *itr_ = grp_->GetFirstMember(); itr_ != NULL; itr_ = itr_->next()) \
+            for (Player *pPlayer = itr_->getSource(); pPlayer != NULL; pPlayer = NULL)
 
 #endif
