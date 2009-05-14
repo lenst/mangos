@@ -131,8 +131,11 @@ void PlayerbotWarlockAI::DoNonCombatActions(){
     if (LIFE_TAP > 0
         && GetAI()->GetHealthPercent() > 98
         && GetAI()->GetManaPercent() < 60
-        && GetAI()->CastSpell(LIFE_TAP, *bot))
+        && GetAI()->CastSpell(LIFE_TAP, *bot)) {
+        SAY("life tapping");
         return;
+    }
+
 
     // buff myself  DEMON_SKIN, DEMON_ARMOR, SHADOW_WARD, FEL_ARMOR
 

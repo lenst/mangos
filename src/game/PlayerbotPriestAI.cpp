@@ -80,6 +80,11 @@ void PlayerbotPriestAI::HealTarget(Unit &target, uint8 hp){
 } // end HealTarget
 
 
+uint32 PlayerHealthPercent(Player *pPlayer) {
+    return pPlayer->GetHealth()*100 / pPlayer->GetMaxHealth();
+}
+
+
 void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget){
     PlayerbotAI* ai = GetAI();
     Player *bot = GetPlayerBot();
@@ -120,18 +125,24 @@ void PlayerbotPriestAI::DoNextCombatManeuver(Unit *pTarget){
         HealTarget (*bot, ai->GetHealthPercent());
     }
 
-    // Heal master
 
     if (ai->GetRole() != ROLE_DPS)
     {
-        uint32 masterHP = GetMaster()->GetHealth()*100 / GetMaster()->GetMaxHealth();
-
+        // Heal master
+        uint32 masterHP = PlayerHealthPercent(GetMaster());
         if (GetMaster()->isAlive()) {
-            if (masterHP < 25 && PWS > 0 && !GetMaster()->HasAura(PWS, 0)) {
-                ai->CastSpell(PWS, *(GetMaster()));
+            if (masterHP < 25 && PWS > 0 && ai->CastSpell(PWS, *(GetMaster()))) {
             }
             else if (masterHP < 80) {
                 HealTarget (*GetMaster(), masterHP);
+            }
+        }
+        // Heal group
+        DOGROUP(pPlayer) {
+            if (pPlayer->isAlive()) {
+                uint32 playerHP = PlayerHealthPercent(pPlayer);
+                if (playerHP < 75)
+                    HealTarget(*pPlayer, playerHP);                
             }
         }
     }
@@ -332,7 +343,9 @@ void PlayerbotPriestAI::DoNonCombatActions() {
         (m_bot->getRace()==5 /* undead */ && GetAI()->CastSpell (TOUCH_OF_WEAKNESS, *m_bot));
     }
 
-    BuffGroup(FORTITUDE, false);
+    if (BuffGroup(FORTITUDE, false, PRAYER_FORTITUDE)
+        || BuffGroup(SHADOW_PROTECTION, false, PRAYER_OF_SHADOW_PROTECTION))
+        return;
 
     PlayerbotClassAI::DoNonCombatActions();
 } // end DoNonCombatActions
