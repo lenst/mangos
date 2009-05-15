@@ -1066,7 +1066,7 @@ bool PlayerbotAI::CastSpell(uint32 spellId) {
             return false;
 
     	// search for Creature::reachWithSpellAttack to also see some examples of spell distance usage
-    	if (! m_bot->isInFront(pTarget, 10)) {
+    	if (! m_bot->isInFrontInMap(pTarget, 10)) {
             m_bot->SetInFront(pTarget);
             WorldPacket data;
             m_bot->BuildHeartBeatMsg(&data);
