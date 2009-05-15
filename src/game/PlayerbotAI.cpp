@@ -95,6 +95,54 @@ const char* RoleText(RoleType role) {
 }
 
 
+// Several functions iterate thru all the inventory. Instead of
+// duplicating the dubble loop in every function here is an iterator
+// of a kind.
+
+struct InventoryIterator {
+    Player *m_bot;
+    int m_slot;
+    int m_end_slot;
+    int m_bag;
+    InventoryIterator(Player *bot) :
+        m_bot(bot),
+        m_slot(INVENTORY_SLOT_ITEM_START),
+        m_end_slot(INVENTORY_SLOT_ITEM_END),
+        m_bag(INVENTORY_SLOT_BAG_0)
+        { }
+    bool HasMore() {
+        return m_bag == INVENTORY_SLOT_BAG_0 || m_bag < INVENTORY_SLOT_BAG_END; 
+    }
+    InventoryIterator& operator++() { 
+        if (m_bag == INVENTORY_SLOT_BAG_0) {
+            ++m_slot;
+            if (m_slot < INVENTORY_SLOT_ITEM_END)
+                return *this;
+            m_bag = INVENTORY_SLOT_BAG_START-1;
+            m_slot = m_end_slot = 0;
+        }
+        while (HasMore()) {
+            if (++m_slot < m_end_slot)
+                return *this;
+            ++m_bag;
+            if (HasMore()) {
+                const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, m_bag);
+                if (pBag) {
+                    m_slot = 0;
+                    m_end_slot = pBag->GetBagSize();
+                    return *this;
+                }
+            }
+        }
+        return *this;
+    }
+    Item* operator*() {
+        return m_bot->GetItemByPos(m_bag, m_slot);
+    }
+};
+
+
+
 // finds spell ID for matching substring args
 // in priority of full text match, spells not taking reagents, and highest rank
 uint32 PlayerbotAI::getSpellId(const char* args) const {
@@ -169,9 +217,9 @@ void PlayerbotAI::SendNotEquipList(Player& player) {
     std::list<Item*>* equip[19];
     for (uint8 i=0; i < 19; ++i) equip[i] = NULL;
 
-    // list out items in main backpack
-    for (uint8 slot=INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++) {
-    	Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+    // list out items in inventory
+    for (InventoryIterator i(m_bot); i.HasMore(); ++i) {
+    	Item* const pItem = *i;
     	if (! pItem) continue;
 
         uint16 dest;
@@ -189,29 +237,6 @@ void PlayerbotAI::SendNotEquipList(Player& player) {
 
         std::list<Item*>* itemListForEqSlot = equip[equipSlot];
         itemListForEqSlot->push_back(pItem);
-    }
-
-    // list out items in other removable backpacks
-    for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag) {
-    	const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
-    	if (pBag) {
-            for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot) {
-                Item* const pItem = m_bot->GetItemByPos(bag, slot);
-                if (! pItem) continue;
-
-                uint16 equipSlot;
-                uint8 msg = m_bot->CanEquipItem(NULL_SLOT, equipSlot, pItem, !pItem->IsBag() );
-                if( msg != EQUIP_ERR_OK ) continue;
-                if (!(equipSlot >= 0 && equipSlot < 19)) continue;
-
-                // create a list if one doesn't already exist
-                if (equip[equipSlot] == NULL)
-                    equip[equipSlot] = new std::list<Item*>;
-
-                std::list<Item*>* itemListForEqSlot = equip[equipSlot];
-                itemListForEqSlot->push_back(pItem);
-            }
-    	}
     }
 
     TellMaster("Here's all the items in my inventory that I can equip.");
@@ -590,9 +615,8 @@ void PlayerbotAI::HandleBotOutgoingPacketNow(const WorldPacket& packet) {
             // list out items available for trade
             std::ostringstream out;
 
-            // list out items in main backpack
-            for (uint8 slot=INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++) {
-                const Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+            for (InventoryIterator i(m_bot); i.HasMore(); ++i) {
+                const Item* const pItem = *i;
                 if (pItem && pItem->CanBeTraded())
                 {
                     const ItemPrototype* const pItemProto = pItem->GetProto();
@@ -601,26 +625,6 @@ void PlayerbotAI::HandleBotOutgoingPacketNow(const WorldPacket& packet) {
                     out << " |cffffffff|Hitem:" << pItemProto->ItemId << ":0:0:0:0:0:0:0" << "|h[" << name << "]|h|r";
                     if (pItem->GetCount() > 1)
                         out << "x" << pItem->GetCount() << ' ';
-                }
-            }
-            // list out items in other removable backpacks
-            for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag) {
-                const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
-                if (pBag) {
-                    for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot) {
-                        const Item* const pItem = m_bot->GetItemByPos(bag, slot);
-                        if (pItem && pItem->CanBeTraded())
-                        {
-                            const ItemPrototype* const pItemProto = pItem->GetProto();
-                            const std::string name = pItemProto->Name1;
-
-                            // item link format: http://www.wowwiki.com/ItemString
-                            // itemId, enchantId, jewelId1, jewelId2, jewelId3, jewelId4, suffixId, uniqueId
-                            out << " |cffffffff|Hitem:" << pItemProto->ItemId << ":0:0:0:0:0:0:0" << "|h[" << name << "]|h|r";
-                            if (pItem->GetCount() > 1)
-                                out << "x" << pItem->GetCount() << ' ';
-                        }
-                    }
                 }
             }
 
@@ -751,12 +755,10 @@ bool PlayerbotAI::HasAura(const char* spellName, const Unit& player) const {
 
 // looks through all items / spells that bot could have to get a mount
 Item* PlayerbotAI::FindMount(uint32 matchingRidingSkill) const {
-    // list out items in main backpack
-
     Item* partialMatch = NULL;
 
-    for (uint8 slot=INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++) {
-        Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+    for (InventoryIterator i(m_bot); i.HasMore(); ++i) {
+        Item* const pItem = *i;
         if (pItem) {
             const ItemPrototype* const pItemProto = pItem->GetProto();
             if (! pItemProto || ! m_bot->CanUseItem(pItemProto) ||
@@ -769,70 +771,31 @@ Item* PlayerbotAI::FindMount(uint32 matchingRidingSkill) const {
         }
     }
 
-    // list out items in other removable backpacks
-    for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag) {
-        const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
-        if (pBag) {
-            for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot) {
-                Item* const pItem = m_bot->GetItemByPos(bag, slot);
-                if (pItem) {
-                    const ItemPrototype* const pItemProto = pItem->GetProto();
-                    if (! pItemProto || ! m_bot->CanUseItem(pItemProto) ||
-                        pItemProto->RequiredSkill != SKILL_RIDING) continue;
-                    if (pItemProto->RequiredSkillRank == matchingRidingSkill) return pItem;
-                    else if (! partialMatch ||
-                             (partialMatch && partialMatch->GetProto()->RequiredSkillRank <
-                              pItemProto->RequiredSkillRank))
-                        partialMatch = pItem;
-                }
-            }
-        }
-    }
     return partialMatch;
 }
 
 Item* PlayerbotAI::FindFood() const {
     // list out items in main backpack
-    for (uint8 slot=INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++) {
-        Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+    for (InventoryIterator i(m_bot); i.HasMore(); ++i) {
+        Item* const pItem = *i;
         if (pItem) {
             const ItemPrototype* const pItemProto = pItem->GetProto();
             if (! pItemProto || ! m_bot->CanUseItem(pItemProto)) continue;
             if(pItemProto->Class==ITEM_CLASS_CONSUMABLE &&
                pItemProto->SubClass==ITEM_SUBCLASS_FOOD) {
-
             	// if is FOOD
             	if (pItemProto->Spells[0].SpellCategory == SPELL_CATEGORY_FOOD)
                     return pItem;
             }
         }
     }
-    // list out items in other removable backpacks
-    for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag) {
-        const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
-        if (pBag) {
-            for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot) {
-                Item* const pItem = m_bot->GetItemByPos(bag, slot);
-                if (pItem) {
-                    const ItemPrototype* const pItemProto = pItem->GetProto();
-                    if (! pItemProto || ! m_bot->CanUseItem(pItemProto)) continue;
-                    if(pItemProto->Class==ITEM_CLASS_CONSUMABLE &&
-                       pItemProto->SubClass==ITEM_SUBCLASS_FOOD) {
-                        // if is FOOD
-                        if (pItemProto->Spells[0].SpellCategory == SPELL_CATEGORY_FOOD)
-                            return pItem;
-                    }
-                }
-            }
-        }
-    }
     return NULL;
 }
 
+
 Item* PlayerbotAI::FindDrink() const {
-    // list out items in main backpack
-    for (uint8 slot=INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++) {
-        Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+    for (InventoryIterator i(m_bot); i.HasMore(); ++i) {
+        Item* const pItem = *i;
         if (pItem) {
             const ItemPrototype* const pItemProto = pItem->GetProto();
             if (! pItemProto || ! m_bot->CanUseItem(pItemProto)) continue;
@@ -842,56 +805,20 @@ Item* PlayerbotAI::FindDrink() const {
                     return pItem;
             }
         }
-    }
-    // list out items in other removable backpacks
-    for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag) {
-        const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
-        if (pBag) {
-            for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot) {
-                Item* const pItem = m_bot->GetItemByPos(bag, slot);
-                if (pItem) {
-                    const ItemPrototype* const pItemProto = pItem->GetProto();
-                    if (! pItemProto || ! m_bot->CanUseItem(pItemProto)) continue;
-                    if(pItemProto->Class==ITEM_CLASS_CONSUMABLE &&
-                       pItemProto->SubClass==ITEM_SUBCLASS_FOOD) {
-                        // if is WATER
-                        if (pItemProto->Spells[0].SpellCategory == SPELL_CATEGORY_DRINK)
-                            return pItem;
-                    }
-                }
-            }
-        }
+
     }
     return NULL;
 }
 
 Item* PlayerbotAI::FindBandage() const {
-    // list out items in main backpack
-    for (uint8 slot=INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; slot++) {
-        Item* const pItem = m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+    for (InventoryIterator i(m_bot); i.HasMore(); ++i) {
+        Item* const pItem = *i;
         if (pItem) {
             const ItemPrototype* const pItemProto = pItem->GetProto();
             if (! pItemProto || ! m_bot->CanUseItem(pItemProto)) continue;
             if(pItemProto->Class==ITEM_CLASS_CONSUMABLE &&
                pItemProto->SubClass==ITEM_SUBCLASS_BANDAGE) {
             	return pItem;
-            }
-        }
-    }
-    // list out items in other removable backpacks
-    for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag) {
-        const Bag* const pBag = (Bag*) m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
-        if (pBag) {
-            for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot) {
-                Item* const pItem = m_bot->GetItemByPos(bag, slot);
-                if (pItem) {
-                    const ItemPrototype* const pItemProto = pItem->GetProto();
-                    if (! pItemProto || ! m_bot->CanUseItem(pItemProto)) continue;
-                    if(pItemProto->Class==ITEM_CLASS_CONSUMABLE &&
-                       pItemProto->SubClass==ITEM_SUBCLASS_BANDAGE) {
-                        return pItem;
-                    }
-                }
             }
         }
     }
