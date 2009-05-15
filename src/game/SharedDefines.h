@@ -203,6 +203,12 @@ enum ItemQualities
     ITEM_QUALITY_HEIRLOOM              = 7
 };
 
+enum SpellCategory
+{
+    SPELL_CATEGORY_FOOD             = 11,
+    SPELL_CATEGORY_DRINK            = 59
+};
+
 #define MAX_ITEM_QUALITY                 8
 
 // ***********************************
